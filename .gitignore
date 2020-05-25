@@ -1,0 +1,6 @@
+__pycache__
+.git
+.idea
+db.sqlite3
+venv
+migrations
