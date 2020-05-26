@@ -6,22 +6,30 @@ from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from api.serializers import LettersSerializer
 from axis.models import Letters
 
 
-class APIListView(generics.ListAPIView):
+class DocsView(APIView):
     """
-       Returns a paginated and sorted by date list of greetings .
+    1) Need to download data from given URL and save to DataBase. WARNING! It’s a
+    very long process, you need to wait ...
+    2) For viewing data in json (EndPoint №1)
+    3) For conver and export data .xlslxlls file (EndPoint №2)
+    4) Just for confortable preview (paginated by 100 elements on the page)
 
     """
-    queryset = Letters.objects.all().order_by('-date')
-    serializer_class = LettersSerializer
 
-    def get_renderers(self):
-        return [BrowsableAPIRenderer(), JSONRenderer(), XLSXRenderer()]
+    def get(self, request, *args, **kwargs):
+        apidocs = {'1)Download and Save data': request.build_absolute_uri('download/'),
+                   '2)View all data in json': request.build_absolute_uri('api/json/'),
+                   '3)Export all data to .xlsx': request.build_absolute_uri('api/xlsx/'),
+                   '4)View paginated data': request.build_absolute_uri('api/paginated_data/'),
+                   }
+        return Response(apidocs)
 
 
 class JSONListView(ReadOnlyModelViewSet):
@@ -35,6 +43,11 @@ class JSONListView(ReadOnlyModelViewSet):
 
     def get_renderers(self):
         return [JSONRenderer()]
+
+    def get_renderer_context(self):
+        serializer = self.get_serializer(self.get_queryset(), many=True)
+        response = Response(data=serializer.data, headers={'indent': '    '})
+        return response
 
 
 class XLSXViewSet(XLSXFileMixin, ReadOnlyModelViewSet):
@@ -109,3 +122,15 @@ class XLSXViewSet(XLSXFileMixin, ReadOnlyModelViewSet):
         },
         'height': 170,
     }
+
+
+class APIListView(generics.ListAPIView):
+    """
+       Returns a paginated and sorted by date list of greetings .
+
+    """
+    queryset = Letters.objects.all().order_by('-date')
+    serializer_class = LettersSerializer
+
+    def get_renderers(self):
+        return [BrowsableAPIRenderer(), JSONRenderer(), XLSXRenderer()]

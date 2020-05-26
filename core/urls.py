@@ -20,6 +20,6 @@ admin.autodiscover()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('axis.urls')),
-    path('api/', include('api.urls'), name='api'),
+    path('download/', include('axis.urls')),
+    path('', include('api.urls'), name='api'),
 ]

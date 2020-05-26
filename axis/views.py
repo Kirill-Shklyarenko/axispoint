@@ -30,7 +30,6 @@ def download_json() -> list:
         print(exc)
     else:
         if response.status_code == 200:
-            print('Success downloading data from given URL!')
             response = response.json()
             for dict_row in response['items']:
                 date_list = dict_row['thedate'].split(sep=' ')[:3]
@@ -41,11 +40,10 @@ def download_json() -> list:
             return response['items']
 
         elif response.status_code == 404:
-            print('Not Found data from given URL')
+            return []
 
 
 def save_to_model(request: HttpRequest) -> HttpResponse:
-    # TODO: Async connection to DataBase
     processed_list = download_json()
     if processed_list:
         for dict_row in processed_list:
@@ -58,7 +56,7 @@ def save_to_model(request: HttpRequest) -> HttpResponse:
                                     date=dict_row['thedate'],
                                     )
                 greetings.save()
-        print('All greetings are saved in Django Model')
-        return HttpResponse(status=200)
+        return HttpResponse('<h1>Success Downloading and Saving data from given URL!</h1>'
+                            '<a href="/">Back</a>')
     else:
-        return HttpResponse(status=404)
+        return HttpResponse('<h1>Not Found data from given URL</h1>')
