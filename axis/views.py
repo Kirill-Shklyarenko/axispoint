@@ -1,5 +1,9 @@
-import requests
 from datetime import datetime as dt
+
+import requests
+from django.http import HttpRequest, HttpResponse
+
+from .models import Letters
 
 
 # Create your views here.
@@ -38,3 +42,23 @@ def download_json() -> list:
 
         elif response.status_code == 404:
             print('Not Found data from given URL')
+
+
+def save_to_model(request: HttpRequest) -> HttpResponse:
+    # TODO: Async connection to DataBase
+    processed_list = download_json()
+    if processed_list:
+        for dict_row in processed_list:
+            if not Letters.objects.get(id=int(dict_row['id'])):
+                greetings = Letters(id=int(dict_row['id']),
+                                    category=dict_row['category'],
+                                    sender=dict_row['from'],
+                                    title=dict_row['title'],
+                                    text=dict_row['text'],
+                                    date=dict_row['thedate'],
+                                    )
+                greetings.save()
+        print('All greetings are saved in Django Model')
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=404)
