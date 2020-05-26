@@ -5,5 +5,5 @@ from axis.models import Letters
 class LettersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Letters
-        fields = ('id', 'category', 'sender', 'title', 'text', 'date',)
+        fields = '__all__'
         read_only_fields = ('id', 'category', 'sender', 'title', 'text', 'date',)
